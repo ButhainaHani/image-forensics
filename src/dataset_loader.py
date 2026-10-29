@@ -33,9 +33,8 @@ def load_mask(mask_path):
 
 
 if __name__ == "__main__":
-    eraser_path = Path(r"C:\Datasets\eraser_benchmark_folders")
-
-    # Test one image and its mask
+    eraser_path = Path(
+        r"C:\Users\AdminOS\OneDrive\Documents\datasets\eraser_benchmark_folders\eraser_benchmark_folders")    # Test one image and its mask
     image_path = eraser_path / "15" / "15_.png"
     mask_path = eraser_path / "15" / "15_01.png"
 
