@@ -26,36 +26,35 @@ print("Frequency Analysis environment is ready!", flush=True)
 # ==========================================
 # 2. Frequency Analysis Core (DCT-based)
 # ==========================================
+
 def perform_frequency_analysis(image_path):
     """
     تحويل الصورة إلى التدرج الرمادي وتطبيق Discrete Cosine Transform (DCT)
-    لاستخراج خريطة الترددات وكشف آثار التلاعب أو إعادة الضغط.
+    مع تحسين إبراز الترددات العالية وآثار التلاعب.
     """
-    # قراءة الصورة
     image = cv2.imread(str(image_path))
     if image is None:
         raise ValueError(f"Could not read image: {image_path}")
 
     # تحويل الصورة إلى Grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # تحويل القيم إلى float32 لعملية الـ DCT
     gray_float = np.float32(gray) / 255.0
 
     # تطبيق الـ 2D DCT
     dct_image = cv2.dct(gray_float)
 
-    # التركيز على الترددات العالية أو استخراج خريطة طاقة الترددات (Energy Map)
-    # لحساب خريطة مرئية، يمكننا حساب القيمة المطلقة وتضخيمها للعرض
-    dct_log = np.log(np.abs(dct_image) + 1.0)
+    # أخذ اللوغاريتم لإبراز التفاصيل الصغيرة
+    dct_log = np.log(np.abs(dct_image) + 1e-5)
 
-    # تطبيع القيم لتكون بين 0 و 255 من نوع uint8 لحفظها كصورة
-    dct_normalized = cv2.normalize(dct_log, None, 0, 255, cv2.NORM_MINMAX)
-    frequency_map = dct_normalized.astype(np.uint8)
+    # تحسين التباين بعمل Scaling قوي لتظهر الفروقات بوضوح بدلاً من السواد الكامل
+    # نلغي قيمة التردد المنخفض جداً (الركن العلوي الأيسر [0,0]) لأنه كبير جداً ويطمس باقي الترددات
+    dct_log[0, 0] = 0
+
+    # تطبيع القيم لتكون بين 0 و 255
+    frequency_map = cv2.normalize(dct_log, None, 0, 255, cv2.NORM_MINMAX)
+    frequency_map = frequency_map.astype(np.uint8)
 
     return frequency_map
-
-
 # ==========================================
 # 3. Main Processing Function
 # ==========================================
